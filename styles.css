@@ -1,0 +1,30 @@
+.task-date,
+p {
+  all: unset;
+}
+
+#search-label {
+  margin: 0 10px;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+}
+.task > * {
+  margin: 4px 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+.marked {
+  text-decoration: line-through;
+}
+
+.highlight {
+  background-color: #c95c08;
+  color: #ffffff;
+  font-size: 1.5rem;
+}
