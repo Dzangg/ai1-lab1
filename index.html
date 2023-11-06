@@ -3,26 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>Document</title>
-    <script src="index.js"></script>
+    <link rel="stylesheet" href="leaflet-1.7.1/leaflet.css" />
+    <script src="leaflet-1.7.1/leaflet-src.js"></script>
+    <script src="leaflet-1.7.1/leaflet-providers.js"></script>
+    <script src="leaflet-1.7.1/leaflet-image.js"></script>
+
+    <title>Canvas</title>
+
+    <style>
+      #maps {
+        display: flex;
+      }
+      #map,
+      #savedMap {
+        width: 600px;
+        height: 300px;
+        border: 1px solid black;
+      }
+
+      #tables {
+        display: flex;
+        align-items: center;
+      }
+      .grid-item {
+        overflow: hidden;
+        overflow-wrap: break-word;
+      }
+
+      #table1,
+      #table2 {
+        width: 600px;
+        height: 300px;
+        border: 1px solid black;
+      }
+    </style>
   </head>
   <body>
-    <h2>Search</h2>
-    <input type="text" id="search" />
-    <section>
-      <h2>Tasks</h2>
-      <ul id="tasks">
-        <span>.</span>
-      </ul>
-    </section>
-    <section>
-      <h2>Add Task</h2>
-      <label for="task-title">Task</label>
-      <input type="text" id="task-title" />
-      <label for="task-date"></label>
-      <input type="date" id="task-date" />
-      <button onclick="addTask()">Add Task</button>
-    </section>
+    <div id="maps">
+      <div id="map"></div>
+      <canvas id="savedMap"></canvas>
+    </div>
+
+    <button id="getLocation">Moja lokalizacja</button>
+    <button id="saveButton">Pobierz mapę</button>
+    <br />
+
+    <div id="tables">
+      <div id="table1"></div>
+      <p>-></p>
+      <div id="table2"></div>
+    </div>
+
+    <script src="index.js"></script>
   </body>
 </html>

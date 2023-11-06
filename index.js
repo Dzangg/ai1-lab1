@@ -1,205 +1,199 @@
-class toDoList {
-  constructor() {
-    this.todos = [];
-    this.loadTodos();
-    this.drawTodos();
-    this.searchTodos();
-    this.searchMode = false;
-    this.searchPhrase = '';
-  }
+let map = L.map('map').setView([53.430127, 14.564802], 18);
+// L.tileLayer.provider('OpenStreetMap.DE').addTo(map);
+L.tileLayer.provider('Esri.WorldImagery').addTo(map);
+let marker = L.marker([53.430127, 14.564802]).addTo(map);
+marker.bindPopup('<strong>Hello!</strong><br>This is a popup.');
 
-  loadTodos() {
-    this.todos = JSON.parse(localStorage.getItem('todos')) || [];
-  }
-
-  saveTodos(todos = this.todos) {
-    localStorage.setItem('todos', JSON.stringify(todos));
-  }
-
-  drawTodos(todos = this.todos) {
-    if (this.searchMode) {
-      let filteredTodos = this.todos.filter((todo) => {
-        return todo.title.includes(this.searchPhrase);
-      });
-      todos = filteredTodos;
-    }
-
-    let tasksParent = document.getElementById('tasks');
-    while (tasksParent.hasChildNodes()) {
-      tasksParent.removeChild(tasksParent.firstChild);
-    }
-    for (let i = 0; i < todos.length; i++) {
-      let task = document.createElement('li');
-      let taskDone = document.createElement('input');
-      let taskTitle = document.createElement('p');
-      let taskDate = document.createElement('p');
-      let taskDelete = document.createElement('button');
-
-      let taskEditTitle = document.createElement('input');
-      let taskEditDate = document.createElement('input');
-      let taskEditButton = document.createElement('button');
-
-      const search = document.getElementById('search').value;
-
-      taskTitle.classList.toggle('marked', todos[i].isDone);
-      taskDate.classList.toggle('marked', todos[i].isDone);
-
-      task.className = 'task';
-      task.onclick = () => {
-        taskTitle.classList.toggle('hidden');
-        taskDate.classList.toggle('hidden');
-        taskEditTitle.classList.toggle('hidden');
-        taskEditDate.classList.toggle('hidden');
-        taskEditButton.classList.toggle('hidden');
-      };
-
-      task.blur = () => {
-        taskTitle.classList.remove('hidden');
-        taskDate.classList.remove('hidden');
-        taskEditTitle.classList.add('hidden');
-        taskEditDate.classList.add('hidden');
-        taskEditButton.classList.add('hidden');
-      };
-
-      taskDone.className = 'task-done';
-      taskDone.type = 'checkbox';
-      taskDone.checked = todos[i].isDone;
-      taskDone.onclick = (e) => {
-        e.stopPropagation();
-        todos[i].isDone = !todos[i].isDone;
-        this.saveTodos(todos);
-        this.loadTodos();
-        this.drawTodos(todos);
-      };
-
-      taskTitle.classList.add('task-title');
-      taskTitle.innerHTML = todos[i].title;
-      taskDate.classList.add('task-date');
-      taskDate.innerHTML = todos[i].date || 'No date';
-      taskDelete.classList.add('task-delete');
-      taskDelete.innerHTML = 'Delete';
-      taskDelete.onclick = (e) => {
-        e.stopPropagation();
-        let todosTemp = todos;
-        todosTemp = this.todos.filter((todo) => {
-          return todo.id != todos[i].id;
-        });
-        for (let i = 0; i < todosTemp.length; i++) {
-          todosTemp[i].id = i + 1;
-        }
-        this.saveTodos(todosTemp);
-        this.loadTodos();
-        this.drawTodos(todosTemp);
-      };
-
-      // Edit
-      taskEditTitle.type = 'text';
-      taskEditTitle.classList.add('task-edit-title', 'hidden');
-      taskEditTitle.value = taskTitle.innerHTML;
-      taskEditTitle.onclick = (e) => {
-        e.stopPropagation();
-      };
-      taskEditDate.type = 'date';
-      taskEditDate.classList.add('task-edit-title', 'hidden');
-      taskEditDate.value = taskDate.innerHTML;
-      taskEditDate.min = getTomorrowDate();
-      taskEditButton.innerHTML = 'Save';
-      taskEditButton.classList.add('task-edit-button', 'hidden');
-      taskEditButton.onclick = (e) => {
-        e.stopPropagation();
-        todos[i].date = taskEditDate.value;
-        todos[i].title = taskEditTitle.value;
-        this.saveTodos(todos);
-        this.loadTodos();
-        this.drawTodos(todos);
-      };
-      taskEditDate.onclick = (e) => {
-        e.stopPropagation();
-      };
-
-      if (search.length > 1) {
-        const title = taskTitle.textContent;
-        const searchTerm = new RegExp(search, 'g'); // 'gi' for global and case-insensitive search
-        const highlightedTitle = title.replace(
-          searchTerm,
-          (match) => `<span class="highlight">${match}</span>`
-        );
-        taskTitle.innerHTML = highlightedTitle;
-      }
-
-      task.appendChild(taskDone);
-      task.appendChild(taskEditTitle);
-      task.appendChild(taskTitle);
-      task.appendChild(taskEditDate);
-      task.appendChild(taskDate);
-      task.appendChild(taskEditButton);
-      task.appendChild(taskDelete);
-      tasksParent.appendChild(task);
-    }
-  }
-
-  searchTodos() {
-    const search = document.getElementById('search');
-    search.oninput = () => {
-      this.searchPhrase = search.value;
-      if (search.value.length > 1) {
-        this.searchMode = true;
-        this.drawTodos();
-      } else {
-        this.searchMode = false;
-        this.drawTodos();
-      }
-    };
-  }
-
-  addTodo() {
-    let id = this.todos.length + 1;
-    let title = document.getElementById('task-title').value;
-    let date = document.getElementById('task-date').value;
-    let isDone = false;
-
-    if (title.length < 3) {
-      alert('Title must be at least 3 characters long');
-      return;
-    }
-    if (title.length > 255) {
-      alert('Title must be less than 255 characters long');
-      return;
-    }
-
-    let task = new Task(id, title, date, isDone);
-    this.todos.push(task);
-    this.saveTodos();
-    this.loadTodos();
-    this.drawTodos();
-  }
-}
-
-class Task {
-  constructor(id, title, date, isDone) {
-    this.id = id;
-    this.title = title;
-    this.date = date;
-    this.isDone = isDone;
-  }
-}
-
-let toDo;
-window.onload = () => {
-  toDo = new toDoList();
-  document.getElementById('task-date').min = getTomorrowDate();
+let piecesArray = [];
+window.onload = function () {
+  Notification.requestPermission();
 };
+function shuffle(array) {
+  let currentIndex = array.length,
+    randomIndex;
 
-function addTask() {
-  toDo.addTodo();
+  // While there remain elements to shuffle.
+  while (currentIndex > 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
 }
 
-function searchTodos() {
-  toDo.searchTodos();
+function validatePuzzles() {
+  let table2 = document.getElementById('table2');
+  let childelements = table2.querySelectorAll('.grid-item');
+  let cnt = 0;
+  for (const div of childelements) {
+    let child = div.firstChild;
+    if (child) {
+      if (child.id !== `piece${cnt++}`) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  return true;
 }
 
-function getTomorrowDate() {
-  const tomorrow = new Date();
-  tomorrow.setDate(new Date().getDate() + 1);
-  return tomorrow.toISOString().split('T')[0];
-}
+document.getElementById('saveButton').addEventListener('click', function () {
+  leafletImage(map, function (err, canvas) {
+    piecesArray = [];
+    document.getElementById('table1').innerHTML = '';
+    document.getElementById('table2').innerHTML = '';
+
+    let rasterMap = document.createElement('canvas');
+    let rasterContext = rasterMap.getContext('2d');
+
+    const originalWidth = 600;
+    const originalHeight = 300;
+    rasterMap.width = originalWidth;
+    rasterMap.height = originalHeight;
+    rasterContext.drawImage(canvas, 0, 0, originalWidth, originalHeight);
+    let savedMap = document.getElementById('savedMap');
+    let savedMapContext = savedMap.getContext('2d');
+    savedMapContext.drawImage(
+      canvas,
+      0,
+      0,
+      originalWidth,
+      originalHeight,
+      0,
+      0,
+      savedMap.width,
+      savedMap.height
+    );
+
+    const numRows = 4;
+    const numCols = 4;
+
+    const pieceWidth = originalWidth / numCols;
+    const pieceHeight = originalHeight / numRows;
+
+    const table1 = document.getElementById('table1');
+    table1.style.display = 'grid';
+    table1.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
+    table1.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
+
+    const table2 = document.getElementById('table2');
+    table2.style.display = 'grid';
+    table2.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
+    table2.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
+
+    for (let row = 0; row < numRows; row++) {
+      for (let col = 0; col < numCols; col++) {
+        const div = document.createElement('div');
+        const div2 = document.createElement('div');
+        div.classList = 'grid-item drag-target';
+        div2.classList = 'grid-item drag-target';
+        table1.appendChild(div);
+        table2.appendChild(div2);
+      }
+    }
+
+    let cnt = 0;
+    for (let row = 0; row < numRows; row++) {
+      for (let col = 0; col < numCols; col++) {
+        const pieceCanvas = document.createElement('canvas');
+        pieceCanvas.id = `piece${cnt++}`;
+        pieceCanvas.width = pieceWidth;
+        pieceCanvas.height = pieceHeight;
+        pieceCanvas.setAttribute('draggable', 'true');
+        pieceCanvas.addEventListener('dragstart', function (event) {
+          event.dataTransfer.setData('text', this.id);
+        });
+
+        const pieceContext = pieceCanvas.getContext('2d');
+        pieceContext.drawImage(
+          rasterMap,
+          col * pieceWidth,
+          row * pieceHeight,
+          pieceWidth,
+          pieceHeight,
+          0,
+          0,
+          pieceWidth,
+          pieceHeight
+        );
+
+        piecesArray.push(pieceCanvas);
+      }
+    }
+
+    let targets = document.querySelectorAll('.drag-target');
+    for (let target of targets) {
+      target.addEventListener('dragenter', function (event) {
+        this.style.border = '1px solid #7FE9D9';
+      });
+      target.addEventListener('dragleave', function (event) {
+        this.style.border = 'none';
+      });
+      target.addEventListener('dragover', function (event) {
+        event.preventDefault();
+      });
+      target.addEventListener(
+        'drop',
+
+        function (event) {
+          let myElement = document.getElementById(
+            event.dataTransfer.getData('text')
+          );
+          this.style.border = 'none';
+          if (!this.firstChild) {
+            this.appendChild(myElement);
+          }
+        },
+        false
+      );
+
+      target.addEventListener('dragend', function (event) {
+        if (validatePuzzles()) {
+          console.log('Puzzle solved.');
+          let permission = Notification.permission;
+          if (permission === 'granted') {
+            new Notification('You won!');
+          }
+        }
+      });
+    }
+
+    piecesArray = shuffle(piecesArray);
+    let ch = table1.querySelectorAll('.grid-item');
+    for (let index = 0; index < piecesArray.length; index++) {
+      ch[index].appendChild(piecesArray[index]);
+    }
+  });
+});
+
+document
+  .getElementById('getLocation')
+  .addEventListener('click', function (event) {
+    if (!navigator.geolocation) {
+      console.log('No geolocation.');
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        let lat = position.coords.latitude;
+        let lon = position.coords.longitude;
+
+        L.marker([lat, lon]).addTo(map);
+        map.setView([lat, lon]);
+      },
+      (positionError) => {
+        console.error(positionError);
+      },
+      {
+        enableHighAccuracy: true,
+      }
+    );
+  });
