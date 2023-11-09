@@ -1,8 +1,5 @@
 let map = L.map('map').setView([53.430127, 14.564802], 18);
-// L.tileLayer.provider('OpenStreetMap.DE').addTo(map);
 L.tileLayer.provider('Esri.WorldImagery').addTo(map);
-let marker = L.marker([53.430127, 14.564802]).addTo(map);
-marker.bindPopup('<strong>Hello!</strong><br>This is a popup.');
 
 let piecesArray = [];
 window.onload = function () {
@@ -166,7 +163,7 @@ document.getElementById('saveButton').addEventListener('click', function () {
       });
     }
 
-    piecesArray = shuffle(piecesArray);
+    // piecesArray = shuffle(piecesArray);
     let ch = table1.querySelectorAll('.grid-item');
     for (let index = 0; index < piecesArray.length; index++) {
       ch[index].appendChild(piecesArray[index]);
@@ -181,19 +178,18 @@ document
       console.log('No geolocation.');
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        let lat = position.coords.latitude;
-        let lon = position.coords.longitude;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          let lat = position.coords.latitude;
+          let lon = position.coords.longitude;
 
-        L.marker([lat, lon]).addTo(map);
-        map.setView([lat, lon]);
-      },
-      (positionError) => {
-        console.error(positionError);
-      },
-      {
-        enableHighAccuracy: true,
-      }
-    );
+          // L.marker([lat, lon]).addTo(map);
+          map.setView([lat, lon]);
+        },
+        (positionError) => {
+          console.error(positionError);
+        }
+      );
+    }
   });
