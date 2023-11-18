@@ -3,57 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="leaflet-1.7.1/leaflet.css" />
-    <script src="leaflet-1.7.1/leaflet-src.js"></script>
-    <script src="leaflet-1.7.1/leaflet-providers.js"></script>
-    <script src="leaflet-1.7.1/leaflet-image.js"></script>
-
-    <title>Canvas</title>
-
-    <style>
-      #maps {
-        display: flex;
-      }
-      #map,
-      #savedMap {
-        width: 600px;
-        height: 300px;
-        border: 1px solid black;
-      }
-
-      #tables {
-        display: flex;
-        align-items: center;
-      }
-      .grid-item {
-        overflow: hidden;
-        overflow-wrap: break-word;
-      }
-
-      #table1,
-      #table2 {
-        width: 600px;
-        height: 300px;
-        border: 1px solid black;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
+    <script src="index.js"></script>
+    <title>Document</title>
   </head>
   <body>
-    <div id="maps">
-      <div id="map"></div>
-      <canvas id="savedMap"></canvas>
+    <div id="app-container">
+      
+      <div id="search-container">
+        <input type="text" id="search-input" value="Stargard, Poland" />
+        <button id="search-btn">Get weather</button>
+      </div>
+
+      <h1>Current Weather</h1>
+      <div id="weather-result">  
+        <div class="weather-block">
+          <div class="weather-date">18.11.2023 11:15</div>
+          <img
+            class="weather-icon"
+            src="https://openweathermap.org/img/wn/10d@2x.png"
+          ></img>
+          <div class="weather-temp">6.0 &deg;C</div>
+          <div class="weather-temp-feels-like">Feel: 5</div>
+          <div class="weather-description">Cloudy</div>
+        </div>
+      </div>
+
+      <h1>Forecast Weather</h1>
+      <div id="forecast-results">
+        <div class="weather-block">
+          <div class="weather-date">18.11.2023 11:15</div>
+          <img
+            class="weather-icon"
+            src="https://openweathermap.org/img/wn/10d@2x.png"
+          ></img>
+          <div class="weather-temp">6.0 &deg;C</div>
+          <div class="weather-temp-feels-like">Feel: 5</div>
+          <div class="weather-description">Cloudy</div>
+        </div>
+      </div>
+
     </div>
-
-    <button id="getLocation">Moja lokalizacja</button>
-    <button id="saveButton">Pobierz mapę</button>
-    <br />
-
-    <div id="tables">
-      <div id="table1"></div>
-      <p>-></p>
-      <div id="table2"></div>
-    </div>
-
-    <script src="index.js"></script>
   </body>
 </html>

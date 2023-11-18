@@ -1,195 +1,128 @@
-let map = L.map('map').setView([53.430127, 14.564802], 18);
-L.tileLayer.provider('Esri.WorldImagery').addTo(map);
+const WeatherApp = class {
+	constructor(apiKey, currentWeather, forecastWeather) {
+		this.apiKey = apiKey;
 
-let piecesArray = [];
-window.onload = function () {
-  Notification.requestPermission();
+		this.currentWeatherBlock = document.querySelector(currentWeather);
+		this.currentForecastBlock = document.querySelector(forecastWeather);
+
+		this.weatherLink = `https://api.openweathermap.org/data/2.5/weather?q={query}&appid=${this.apiKey}&units=metric`;
+		this.forecastLink = `https://api.openweathermap.org/data/2.5/forecast?q={query}&appid=${this.apiKey}&units=metric`;
+
+		this.currentWeather = undefined;
+		this.currentForecast = undefined;
+	}
+
+	getWeather(query) {
+		// this.weatherLink = `https://api.openweathermap.org/data/2.5/weather?q={query}&appid=${this.apiKey}&units=metric`;
+		let url = this.weatherLink.replace('{query}', query);
+		let req = new XMLHttpRequest();
+		req.open('GET', url, true);
+		req.send();
+		req.addEventListener('load', () => {
+			this.currentWeather = JSON.parse(req.responseText);
+			this.drawWeather();
+		});
+	}
+
+	getForecast(query) {
+		// this.forecastLink = `https://api.openweathermap.org/data/2.5/forecast?q={query}&appid=${this.apiKey}&units=metric`;
+		let url = this.forecastLink.replace('{query}', query);
+		fetch(url)
+			.then((response) => {
+				return response.json();
+			})
+			.then((data) => {
+				this.currentForecast = data.list;
+				console.log(data.list);
+				this.drawWeather();
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+	}
+
+	drawWeather() {
+		this.currentWeatherBlock.innerHTML = '';
+		this.currentForecastBlock.innerHTML = '';
+
+		if (this.currentWeather) {
+			const date = new Date(this.currentWeather.dt * 1000); // time in ms
+			const block = this.createWeatherBlock(
+				`${date.toLocaleDateString('pl-PL')} ${date.toLocaleTimeString(
+					'pl-PL'
+				)}`, // convert ms to date and time
+				this.currentWeather.main.temp,
+				this.currentWeather.main.feels_like,
+				this.currentWeather.weather[0].icon,
+				this.currentWeather.weather[0].description
+			);
+			this.currentWeatherBlock.appendChild(block);
+		}
+
+		if (this.currentForecast) {
+			for (let i = 0; i < this.currentForecast.length; i++) {
+				const date = new Date(this.currentForecast[i].dt * 1000); // time in ms
+				const block = this.createWeatherBlock(
+					`${date.toLocaleDateString('pl-PL')} ${date.toLocaleTimeString(
+						'pl-PL'
+					)}`, // convert ms to date and time
+					this.currentForecast[i].main.temp,
+					this.currentForecast[i].main.feels_like,
+					this.currentForecast[i].weather[0].icon,
+					this.currentForecast[i].weather[0].description
+				);
+				this.currentForecastBlock.appendChild(block);
+			}
+		}
+	}
+
+	createWeatherBlock(date, temp, feelTemp, icon, description) {
+		const block = document.createElement('div');
+		block.className = 'weather-block';
+
+		const weatherDate = document.createElement('div');
+		weatherDate.className = 'weather-date';
+		weatherDate.innerText = date;
+
+		const weatherIcon = document.createElement('img');
+		weatherIcon.className = 'weather-icon';
+		weatherIcon.src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+
+		const weatherTemp = document.createElement('div');
+		weatherTemp.className = 'weather-temp';
+		weatherTemp.innerText = temp;
+
+		const weatherFeelTemp = document.createElement('div');
+		weatherFeelTemp.className = 'weather-temp-feels-like';
+		weatherFeelTemp.innerText = `Feels like: ${feelTemp}`;
+
+		const weatherDescription = document.createElement('div');
+		weatherDescription.className = 'weather-description';
+		weatherDescription.innerText = description;
+
+		block.appendChild(weatherDate);
+		block.appendChild(weatherIcon);
+		block.appendChild(weatherTemp);
+		block.appendChild(weatherFeelTemp);
+		block.appendChild(weatherDescription);
+
+		return block;
+	}
 };
-function shuffle(array) {
-  let currentIndex = array.length,
-    randomIndex;
 
-  // While there remain elements to shuffle.
-  while (currentIndex > 0) {
-    // Pick a remaining element.
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-
-    // And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ];
-  }
-
-  return array;
-}
-
-function validatePuzzles() {
-  let table2 = document.getElementById('table2');
-  let childelements = table2.querySelectorAll('.grid-item');
-  let cnt = 0;
-  for (const div of childelements) {
-    let child = div.firstChild;
-    if (child) {
-      if (child.id !== `piece${cnt++}`) {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-  return true;
-}
-
-document.getElementById('saveButton').addEventListener('click', function () {
-  leafletImage(map, function (err, canvas) {
-    piecesArray = [];
-    document.getElementById('table1').innerHTML = '';
-    document.getElementById('table2').innerHTML = '';
-
-    let rasterMap = document.createElement('canvas');
-    let rasterContext = rasterMap.getContext('2d');
-
-    const originalWidth = 600;
-    const originalHeight = 300;
-    rasterMap.width = originalWidth;
-    rasterMap.height = originalHeight;
-    rasterContext.drawImage(canvas, 0, 0, originalWidth, originalHeight);
-    let savedMap = document.getElementById('savedMap');
-    let savedMapContext = savedMap.getContext('2d');
-    savedMapContext.drawImage(
-      canvas,
-      0,
-      0,
-      originalWidth,
-      originalHeight,
-      0,
-      0,
-      savedMap.width,
-      savedMap.height
-    );
-
-    const numRows = 4;
-    const numCols = 4;
-
-    const pieceWidth = originalWidth / numCols;
-    const pieceHeight = originalHeight / numRows;
-
-    const table1 = document.getElementById('table1');
-    table1.style.display = 'grid';
-    table1.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
-    table1.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
-
-    const table2 = document.getElementById('table2');
-    table2.style.display = 'grid';
-    table2.style.gridTemplateColumns = `repeat(${numCols}, 1fr)`;
-    table2.style.gridTemplateRows = `repeat(${numRows}, 1fr)`;
-
-    for (let row = 0; row < numRows; row++) {
-      for (let col = 0; col < numCols; col++) {
-        const div = document.createElement('div');
-        const div2 = document.createElement('div');
-        div.classList = 'grid-item drag-target';
-        div2.classList = 'grid-item drag-target';
-        table1.appendChild(div);
-        table2.appendChild(div2);
-      }
-    }
-
-    let cnt = 0;
-    for (let row = 0; row < numRows; row++) {
-      for (let col = 0; col < numCols; col++) {
-        const pieceCanvas = document.createElement('canvas');
-        pieceCanvas.id = `piece${cnt++}`;
-        pieceCanvas.width = pieceWidth;
-        pieceCanvas.height = pieceHeight;
-        pieceCanvas.setAttribute('draggable', 'true');
-        pieceCanvas.addEventListener('dragstart', function (event) {
-          event.dataTransfer.setData('text', this.id);
-        });
-
-        const pieceContext = pieceCanvas.getContext('2d');
-        pieceContext.drawImage(
-          rasterMap,
-          col * pieceWidth,
-          row * pieceHeight,
-          pieceWidth,
-          pieceHeight,
-          0,
-          0,
-          pieceWidth,
-          pieceHeight
-        );
-
-        piecesArray.push(pieceCanvas);
-      }
-    }
-
-    let targets = document.querySelectorAll('.drag-target');
-    for (let target of targets) {
-      target.addEventListener('dragenter', function (event) {
-        this.style.border = '1px solid #7FE9D9';
-      });
-      target.addEventListener('dragleave', function (event) {
-        this.style.border = 'none';
-      });
-      target.addEventListener('dragover', function (event) {
-        event.preventDefault();
-      });
-      target.addEventListener(
-        'drop',
-
-        function (event) {
-          let myElement = document.getElementById(
-            event.dataTransfer.getData('text')
-          );
-          this.style.border = 'none';
-          if (!this.firstChild) {
-            this.appendChild(myElement);
-          }
-        },
-        false
-      );
-
-      target.addEventListener('dragend', function (event) {
-        if (validatePuzzles()) {
-          console.log('Puzzle solved.');
-          let permission = Notification.permission;
-          if (permission === 'granted') {
-            new Notification('You won!');
-          }
-        }
-      });
-    }
-
-    // piecesArray = shuffle(piecesArray);
-    let ch = table1.querySelectorAll('.grid-item');
-    for (let index = 0; index < piecesArray.length; index++) {
-      ch[index].appendChild(piecesArray[index]);
-    }
-  });
-});
-
-document
-  .getElementById('getLocation')
-  .addEventListener('click', function (event) {
-    if (!navigator.geolocation) {
-      console.log('No geolocation.');
-    }
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          let lat = position.coords.latitude;
-          let lon = position.coords.longitude;
-
-          // L.marker([lat, lon]).addTo(map);
-          map.setView([lat, lon]);
-        },
-        (positionError) => {
-          console.error(positionError);
-        }
-      );
-    }
-  });
+window.onload = () => {
+	const app = new WeatherApp(
+		'0f17b96b670fbdd5ab22265455ed7252',
+		'#weather-result',
+		'#forecast-results'
+	);
+	document.getElementById('search-btn').addEventListener('click', () => {
+		const query = document.querySelector('#search-input').value;
+		if (!query) {
+			alert('Wprowadź nazwę miasta');
+			return;
+		}
+		app.getWeather(query);
+		app.getForecast(query);
+	});
+};

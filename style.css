@@ -1,0 +1,71 @@
+#app-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#search-container {
+	margin: 10px;
+}
+
+#search-input {
+	width: 200px;
+}
+
+.weather-date {
+	grid-area: date;
+	justify-self: center;
+	font-weight: bold;
+	font-size: 1.3rem;
+}
+
+.weather-icon {
+	grid-area: icon;
+	justify-self: center;
+}
+
+.weather-temp {
+	grid-area: temp;
+	justify-self: start;
+	align-self: center;
+	font-weight: bold;
+	font-size: 1.7rem;
+}
+
+.weather-temp-feels-like {
+	grid-area: temp-feels-like;
+	justify-self: start;
+}
+
+.weather-description {
+	grid-area: description;
+	justify-self: start;
+}
+
+.weather-block {
+	display: grid;
+	grid-template-columns: 50px 100px 100px 50px;
+	grid-template-rows: auto;
+	grid-template-areas:
+		'. date date .'
+		'icon icon temp temp'
+		'icon icon temp-feels-like temp-feels-like'
+		'icon icon description description';
+	border: 1px solid black;
+	margin: 20px 10px;
+}
+
+#weather-result {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#forecast-results {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
