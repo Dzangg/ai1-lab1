@@ -119,7 +119,7 @@ window.onload = () => {
 	document.getElementById('search-btn').addEventListener('click', () => {
 		const query = document.querySelector('#search-input').value;
 		if (!query) {
-			alert('Wprowadź nazwę miasta');
+			alert('Please enter city name');
 			return;
 		}
 		app.getWeather(query);
