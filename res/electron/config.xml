@@ -1,0 +1,4 @@
+<platform name="electron">
+    <icon src="res/electron/world-wide-web.png" />
+    <preference name="ElectronSettingsFilePath" value="res/electron/settings.json" />
+</platform>
